@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IXIO Global - Project Hub</title>
+    <meta name="description" content="IXIO Global 프로젝트 허브 - Keyword Trend Monitoring & UI/GUI Systems">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --tertiary-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --dark-bg: #0f0f23;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0c0;
+            --shadow-glow: 0 8px 32px 0 rgba(102, 126, 234, 0.2);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(246, 92, 139, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(79, 172, 254, 0.1) 0%, transparent 50%);
+            animation: backgroundShift 15s ease-in-out infinite alternate;
+            z-index: 0;
+        }
+
+        @keyframes backgroundShift {
+            0% {
+                transform: scale(1) translate(0, 0);
+            }
+
+            100% {
+                transform: scale(1.1) translate(20px, 20px);
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 80px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .logo {
+            font-size: 3rem;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            font-weight: 300;
+        }
+
+        /* Project Grid */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .project-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out backwards;
+        }
+
+        .project-card:nth-child(1) {
+            animation-delay: 0.2s;
+        }
+
+        .project-card:nth-child(2) {
+            animation-delay: 0.4s;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .project-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-glow);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+
+        .project-card:hover::before {
+            opacity: 1;
+        }
+
+        .project-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin-bottom: 24px;
+            transition: transform 0.4s ease;
+        }
+
+        .project-card:hover .project-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .project-card.keyword .project-icon {
+            background: var(--primary-gradient);
+        }
+
+        .project-card.ui-gui .project-icon {
+            background: var(--tertiary-gradient);
+        }
+
+        .project-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .project-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 24px;
+            font-size: 0.95rem;
+        }
+
+        .project-features {
+            list-style: none;
+            margin-bottom: 32px;
+        }
+
+        .project-features li {
+            padding: 8px 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .project-features li::before {
+            content: '✓';
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .project-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card.keyword .project-link {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .project-card.ui-gui .project-link {
+            background: var(--tertiary-gradient);
+            color: white;
+        }
+
+        .project-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+        }
+
+        .project-link::after {
+            content: '→';
+            transition: transform 0.3s ease;
+        }
+
+        .project-link:hover::after {
+            transform: translateX(4px);
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-active {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+        }
+
+        .status-coming {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--card-border);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 20px;
+        }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--text-primary);
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2rem;
+            }
+
+            .tagline {
+                font-size: 1rem;
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .project-card {
+                padding: 32px 24px;
+            }
+
+            .project-title {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Glass effect for better premium feel */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1 class="logo">IXIO Global</h1>
+            <p class="tagline">혁신적인 데이터 분석 및 UI/UX 솔루션</p>
+        </header>
+
+        <div class="projects-grid">
+            <!-- Keyword Trend Monitoring Project -->
+            <div class="project-card keyword glass-effect">
+                <span class="status-badge status-active">● Active</span>
+                <div class="project-icon">📊</div>
+                <h2 class="project-title">Keyword Trend Monitoring</h2>
+                <p class="project-description">
+                    뉴스, 커뮤니티, YouTube를 실시간으로 모니터링하여 키워드 트렌드를 분석하는 AI 기반 시스템
+                </p>
+                <ul class="project-features">
+                    <li>실시간 데이터 수집 (2시간 주기)</li>
+                    <li>AI 기반 트렌드 분석</li>
+                    <li>급등 키워드 알림</li>
+                    <li>Firebase 기반 클라우드 시스템</li>
+                    <li>반응형 대시보드</li>
+                </ul>
+                <a href="./public/index.html" class="project-link">
+                    대시보드 열기
+                </a>
+            </div>
+
+            <!-- UI-GUI Project -->
+            <div class="project-card ui-gui glass-effect">
+                <span class="status-badge status-coming">● Coming Soon</span>
+                <div class="project-icon">🎨</div>
+                <h2 class="project-title">UI-GUI System</h2>
+                <p class="project-description">
+                    모던하고 세련된 관리자 인터페이스 컴포넌트 라이브러리 및 디자인 시스템
+                </p>
+                <ul class="project-features">
+                    <li>프리미엄 UI 컴포넌트</li>
+                    <li>다크/라이트 테마 지원</li>
+                    <li>반응형 디자인</li>
+                    <li>재사용 가능한 컴포넌트</li>
+                    <li>GitHub Pages 호스팅</li>
+                </ul>
+                <a href="#" class="project-link" style="opacity: 0.6; pointer-events: none;">
+                    준비 중
+                </a>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 IXIO Global. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="https://github.com/ixio-global/keyword" class="footer-link" target="_blank">GitHub</a>
+                <a href="./DEPLOYMENT.md" class="footer-link">배포 가이드</a>
+                <a href="./README.md" class="footer-link">문서</a>
+            </div>
+        </footer>
+    </div>
+</body>
+
+</html>
