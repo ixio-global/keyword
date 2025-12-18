@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="키워드 트렌드 모니터링 대시보드 - 데모 버전">
+    <title>키워드 트렌드 모니터링 | 데모 대시보드</title>
+
+    <!-- 스타일시트 -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+
+    <!-- 데모 모드 배너 -->
+    <div
+        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px; text-align: center; font-weight: 600;">
+        🎨 데모 모드 | Firebase 연결 없이 UI를 미리 확인하실 수 있습니다
+    </div>
+
+    <!-- 헤더 -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="logo">키워드 트렌드 모니터링</h1>
+                <nav class="nav">
+                    <a href="demo.html" class="nav-link active">데모 대시보드</a>
+                    <a href="index.html" class="nav-link">라이브 대시보드</a>
+                    <a href="admin.html" class="nav-link">관리자</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- 메인 콘텐츠 -->
+    <main class="container">
+
+        <!-- 통계 요약 -->
+        <section class="mb-xl">
+            <h2 class="mb-md">실시간 통계</h2>
+            <div class="grid grid-4">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-mentions">0</div>
+                    <div class="stat-label">총 언급량</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="active-keywords">0</div>
+                    <div class="stat-label">활성 키워드</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="active-sources">0</div>
+                    <div class="stat-label">모니터링 매체</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="last-update">-</div>
+                    <div class="stat-label">마지막 업데이트</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 키워드 필터 -->
+        <section class="mb-lg">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">필터</h3>
+                </div>
+                <div class="card-body">
+                    <div class="grid grid-3">
+                        <div class="form-group">
+                            <label class="form-label" for="keyword-filter">키워드</label>
+                            <select class="form-select" id="keyword-filter">
+                                <option value="">전체</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="source-filter">매체</label>
+                            <select class="form-select" id="source-filter">
+                                <option value="">전체</option>
+                                <option value="news">뉴스</option>
+                                <option value="community">커뮤니티</option>
+                                <option value="youtube">유튜브</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="time-filter">기간</label>
+                            <select class="form-select" id="time-filter">
+                                <option value="24h">최근 24시간</option>
+                                <option value="7d">최근 7일</option>
+                                <option value="30d">최근 30일</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 트렌드 그래프 -->
+        <section class="mb-xl">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">키워드 트렌드 추이</h3>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="trend-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 급증 알림 -->
+        <section class="mb-xl" id="alerts-section">
+            <h2 class="mb-md">🔔 트렌드 급증 알림</h2>
+            <div id="alerts-container"></div>
+        </section>
+
+        <!-- 데이터 테이블 -->
+        <section class="mb-xl">
+            <div class="card">
+                <div class="card-header d-flex justify-between align-center">
+                    <h3 class="card-title">수집 데이터</h3>
+                    <button class="btn btn-outline" id="refresh-btn">
+                        <span id="refresh-icon">새로고침</span>
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table class="table" id="data-table">
+                            <thead>
+                                <tr>
+                                    <th>매체</th>
+                                    <th>키워드</th>
+                                    <th>제목</th>
+                                    <th>링크</th>
+                                    <th>수집 시간</th>
+                                </tr>
+                            </thead>
+                            <tbody id="data-table-body">
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">데모 데이터를 불러오는 중...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 페이지네이션 -->
+                    <div class="d-flex justify-between align-center mt-md">
+                        <div class="text-muted" id="pagination-info">0개의 결과</div>
+                        <div class="d-flex gap-sm" id="pagination-controls">
+                            <button class="btn btn-outline" id="prev-page" disabled>이전</button>
+                            <button class="btn btn-outline" id="next-page" disabled>다음</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 데모 데이터 및 스크립트 -->
+    <script src="js/demo-data.js"></script>
+    <script>
+        // 데모 데이터 로드
+        const demoData = generateDemoData(100);
+        const trendData = generateTrendData();
+        const stats = generateStats(demoData);
+        const alerts = generateAlerts();
+
+        // 통계 표시
+        document.getElementById('total-mentions').textContent = stats.totalMentions;
+        document.getElementById('active-keywords').textContent = stats.activeKeywords;
+        document.getElementById('active-sources').textContent = stats.activeSources;
+        document.getElementById('last-update').textContent = stats.lastUpdate;
+
+        // 키워드 필터 옵션 추가
+        const keywordFilter = document.getElementById('keyword-filter');
+        demoKeywords.forEach(keyword => {
+            if (keyword.active) {
+                const option = document.createElement('option');
+                option.value = keyword.id;
+                option.textContent = keyword.name;
+                keywordFilter.appendChild(option);
+            }
+        });
+
+        // 차트 생성
+        const ctx = document.getElementById('trend-chart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: trendData.labels,
+                datasets: Object.keys(trendData.datasets).map((keyword, index) => {
+                    const colors = ['#667eea', '#f093fb', '#4facfe', '#ffd89b', '#a8edea'];
+                    return {
+                        label: keyword,
+                        data: trendData.datasets[keyword],
+                        borderColor: colors[index % colors.length],
+                        backgroundColor: colors[index % colors.length] + '20',
+                        tension: 0.4,
+                        fill: true
+                    };
+                })
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // 알림 표시
+        const alertsContainer = document.getElementById('alerts-container');
+        alerts.forEach(alert => {
+            const alertCard = document.createElement('div');
+            alertCard.className = 'card mb-md';
+            alertCard.style.borderLeft = '4px solid #f093fb';
+            alertCard.innerHTML = `
+        <div class="card-body">
+          <h4 style="margin-bottom: 12px;">📈 ${alert.keyword}</h4>
+          <p style="color: var(--text-muted); margin-bottom: 8px;">
+            전 주기 대비 <strong style="color: #f093fb;">${alert.percentageChange}% 상승</strong>
+          </p>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">
+            이전: ${alert.previousCount}건 → 현재: ${alert.recentCount}건
+          </p>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">
+            주요 매체: ${alert.sources}
+          </p>
+        </div>
+      `;
+            alertsContainer.appendChild(alertCard);
+        });
+
+        // 테이블 데이터 표시
+        let currentPage = 0;
+        const itemsPerPage = 20;
+        let filteredData = [...demoData];
+
+        function renderTable() {
+            const tbody = document.getElementById('data-table-body');
+            tbody.innerHTML = '';
+
+            const start = currentPage * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageData = filteredData.slice(start, end);
+
+            if (pageData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">데이터가 없습니다</td></tr>';
+                return;
+            }
+
+            pageData.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+          <td>${item.source}</td>
+          <td><span class="badge">${item.keyword}</span></td>
+          <td>${item.title}</td>
+          <td><a href="${item.url}" target="_blank" class="link">보기</a></td>
+          <td>${new Date(item.timestamp).toLocaleString('ko-KR')}</td>
+        `;
+                tbody.appendChild(tr);
+            });
+
+            // 페이지네이션 정보
+            document.getElementById('pagination-info').textContent =
+                `${filteredData.length}개의 결과 (${start + 1}-${Math.min(end, filteredData.length)})`;
+
+            // 페이지네이션 버튼
+            document.getElementById('prev-page').disabled = currentPage === 0;
+            document.getElementById('next-page').disabled = end >= filteredData.length;
+        }
+
+        // 필터 적용
+        function applyFilters() {
+            const keyword = keywordFilter.value;
+            const source = document.getElementById('source-filter').value;
+
+            filteredData = demoData.filter(item => {
+                if (keyword && item.keywordId !== keyword) return false;
+                if (source && item.sourceType !== source) return false;
+                return true;
+            });
+
+            currentPage = 0;
+            renderTable();
+        }
+
+        // 이벤트 리스너
+        keywordFilter.addEventListener('change', applyFilters);
+        document.getElementById('source-filter').addEventListener('change', applyFilters);
+        document.getElementById('refresh-btn').addEventListener('click', () => {
+            location.reload();
+        });
+        document.getElementById('prev-page').addEventListener('click', () => {
+            if (currentPage > 0) {
+                currentPage--;
+                renderTable();
+            }
+        });
+        document.getElementById('next-page').addEventListener('click', () => {
+            if ((currentPage + 1) * itemsPerPage < filteredData.length) {
+                currentPage++;
+                renderTable();
+            }
+        });
+
+        // 초기 렌더링
+        renderTable();
+    </script>
+
+</body>
+
+</html>
