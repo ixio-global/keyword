@@ -1,0 +1,28 @@
+{
+    "name": "keyword-trend-monitoring",
+    "version": "1.0.0",
+    "description": "키워드 트렌드 모니터링 시스템",
+    "scripts": {
+        "start": "npm run serve",
+        "serve": "npx http-server public -p 8080 -o",
+        "deploy:functions": "cd functions && firebase deploy --only functions",
+        "deploy:hosting": "firebase deploy --only hosting",
+        "deploy:all": "firebase deploy"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/ixio-global/keyword.git"
+    },
+    "keywords": [
+        "keyword",
+        "trend",
+        "monitoring",
+        "firebase",
+        "gemini"
+    ],
+    "author": "",
+    "license": "MIT",
+    "devDependencies": {
+        "http-server": "^14.1.1"
+    }
+}

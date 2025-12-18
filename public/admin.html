@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="키워드 트렌드 모니터링 관리자 페이지 - 키워드, 매체, 알림 설정 관리">
+    <title>키워드 트렌드 모니터링 | 관리자</title>
+
+    <!-- 스타일시트 -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+</head>
+
+<body>
+
+    <!-- 헤더 -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="logo">키워드 트렌드 모니터링</h1>
+                <nav class="nav">
+                    <a href="index.html" class="nav-link">대시보드</a>
+                    <a href="admin.html" class="nav-link active">관리자</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- 메인 콘텐츠 -->
+    <main class="container">
+
+        <!-- 알림 영역 -->
+        <div id="alert-container"></div>
+
+        <!-- 탭 네비게이션 -->
+        <section class="mb-lg">
+            <div class="d-flex gap-md">
+                <button class="btn btn-primary" id="tab-keywords" onclick="switchTab('keywords')">키워드 관리</button>
+                <button class="btn btn-outline" id="tab-sources" onclick="switchTab('sources')">매체 관리</button>
+                <button class="btn btn-outline" id="tab-alerts" onclick="switchTab('alerts')">알림 설정</button>
+                <button class="btn btn-outline" id="tab-accounts" onclick="switchTab('accounts')">계정 관리</button>
+            </div>
+        </section>
+
+        <!-- ==================== 키워드 관리 ==================== -->
+        <section id="section-keywords" class="tab-content">
+
+            <div class="card mb-lg">
+                <div class="card-header">
+                    <h3 class="card-title">키워드 추가</h3>
+                </div>
+                <div class="card-body">
+                    <form id="keyword-form">
+                        <div class="grid grid-2">
+                            <div class="form-group">
+                                <label class="form-label" for="keyword-name">키워드 *</label>
+                                <input type="text" class="form-input" id="keyword-name" placeholder="예: 갤럭시" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="keyword-category">카테고리</label>
+                                <select class="form-select" id="keyword-category">
+                                    <option value="product">제품</option>
+                                    <option value="brand">브랜드</option>
+                                    <option value="trend">트렌드</option>
+                                    <option value="event">이벤트</option>
+                                    <option value="other">기타</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="keyword-description">설명</label>
+                            <textarea class="form-textarea" id="keyword-description"
+                                placeholder="키워드에 대한 간단한 설명"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">키워드 추가</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">등록된 키워드</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>키워드</th>
+                                    <th>카테고리</th>
+                                    <th>설명</th>
+                                    <th>등록일</th>
+                                    <th>작업</th>
+                                </tr>
+                            </thead>
+                            <tbody id="keywords-table-body">
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">등록된 키워드가 없습니다.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ==================== 매체 관리 ==================== -->
+        <section id="section-sources" class="tab-content" style="display: none;">
+
+            <div class="card mb-lg">
+                <div class="card-header">
+                    <h3 class="card-title">매체 추가</h3>
+                </div>
+                <div class="card-body">
+                    <form id="source-form">
+                        <div class="grid grid-2">
+                            <div class="form-group">
+                                <label class="form-label" for="source-name">매체명 *</label>
+                                <input type="text" class="form-input" id="source-name" placeholder="예: 디시인사이드" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="source-type">매체 종류 *</label>
+                                <select class="form-select" id="source-type" required>
+                                    <option value="">선택하세요</option>
+                                    <option value="news">뉴스</option>
+                                    <option value="community">커뮤니티</option>
+                                    <option value="youtube">유튜브</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="source-url">URL 또는 채널 ID *</label>
+                            <input type="text" class="form-input" id="source-url"
+                                placeholder="예: https://gall.dcinside.com/" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="source-notes">비고</label>
+                            <textarea class="form-textarea" id="source-notes" placeholder="수집 시 주의사항 등"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">매체 추가</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">등록된 매체</h3>
+                </div>
+                <div class="card-body">
+
+                    <!-- 뉴스 -->
+                    <h4 class="mt-lg mb-sm">📰 뉴스</h4>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>매체명</th>
+                                    <th>URL</th>
+                                    <th>상태</th>
+                                    <th>작업</th>
+                                </tr>
+                            </thead>
+                            <tbody id="news-sources-body">
+                                <tr>
+                                    <td>구글 뉴스</td>
+                                    <td>https://news.google.com</td>
+                                    <td><span class="badge badge-success">활성</span></td>
+                                    <td><button class="btn btn-danger btn-sm" disabled>삭제</button></td>
+                                </tr>
+                                <tr>
+                                    <td>네이버 뉴스</td>
+                                    <td>https://news.naver.com</td>
+                                    <td><span class="badge badge-success">활성</span></td>
+                                    <td><button class="btn btn-danger btn-sm" disabled>삭제</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 커뮤니티 -->
+                    <h4 class="mt-lg mb-sm">💬 커뮤니티</h4>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>매체명</th>
+                                    <th>URL</th>
+                                    <th>상태</th>
+                                    <th>작업</th>
+                                </tr>
+                            </thead>
+                            <tbody id="community-sources-body">
+                                <tr>
+                                    <td>디시인사이드</td>
+                                    <td>https://gall.dcinside.com</td>
+                                    <td><span class="badge badge-success">활성</span></td>
+                                    <td><button class="btn btn-danger btn-sm" disabled>삭제</button></td>
+                                </tr>
+                                <tr>
+                                    <td>뽐뿌</td>
+                                    <td>https://www.ppomppu.co.kr</td>
+                                    <td><span class="badge badge-success">활성</span></td>
+                                    <td><button class="btn btn-danger btn-sm" disabled>삭제</button></td>
+                                </tr>
+                                <tr>
+                                    <td>루리웹</td>
+                                    <td>https://bbs.ruliweb.com</td>
+                                    <td><span class="badge badge-success">활성</span></td>
+                                    <td><button class="btn btn-danger btn-sm" disabled>삭제</button></td>
+                                </tr>
+                                <tr>
+                                    <td>클리앙</td>
+                                    <td>https://www.clien.net</td>
+                                    <td><span class="badge badge-success">활성</span></td>
+                                    <td><button class="btn btn-danger btn-sm" disabled>삭제</button></td>
+                                </tr>
+                                <tr>
+                                    <td>블라인드</td>
+                                    <td>https://www.teamblind.com</td>
+                                    <td><span class="badge badge-success">활성</span></td>
+                                    <td><button class="btn btn-danger btn-sm" disabled>삭제</button></td>
+                                </tr>
+                                <tr>
+                                    <td>아사모 (네이버 카페)</td>
+                                    <td>https://cafe.naver.com/asamo</td>
+                                    <td><span class="badge badge-warning">권한 필요</span></td>
+                                    <td><button class="btn btn-danger btn-sm" disabled>삭제</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 유튜브 -->
+                    <h4 class="mt-lg mb-sm">📺 유튜브</h4>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>채널명</th>
+                                    <th>채널 ID</th>
+                                    <th>상태</th>
+                                    <th>작업</th>
+                                </tr>
+                            </thead>
+                            <tbody id="youtube-sources-body">
+                                <tr>
+                                    <td>잇섭</td>
+                                    <td>@itsub</td>
+                                    <td><span class="badge badge-success">활성</span></td>
+                                    <td><button class="btn btn-danger btn-sm" disabled>삭제</button></td>
+                                </tr>
+                                <tr>
+                                    <td>슈카월드</td>
+                                    <td>@shukaworld</td>
+                                    <td><span class="badge badge-success">활성</span></td>
+                                    <td><button class="btn btn-danger btn-sm" disabled>삭제</button></td>
+                                </tr>
+                                <tr>
+                                    <td>UnderKG</td>
+                                    <td>@UnderKG</td>
+                                    <td><span class="badge badge-success">활성</span></td>
+                                    <td><button class="btn btn-danger btn-sm" disabled>삭제</button></td>
+                                </tr>
+                                <tr>
+                                    <td>가전주부</td>
+                                    <td>@gajeongzuba</td>
+                                    <td><span class="badge badge-success">활성</span></td>
+                                    <td><button class="btn btn-danger btn-sm" disabled>삭제</button></td>
+                                </tr>
+                                <tr>
+                                    <td>디에디트</td>
+                                    <td>@theedit</td>
+                                    <td><span class="badge badge-success">활성</span></td>
+                                    <td><button class="btn btn-danger btn-sm" disabled>삭제</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ==================== 알림 설정 ==================== -->
+        <section id="section-alerts" class="tab-content" style="display: none;">
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">급증 알림 설정</h3>
+                </div>
+                <div class="card-body">
+                    <form id="alert-settings-form">
+                        <div class="form-group">
+                            <label class="form-label" for="alert-threshold">급증 기준 (%) *</label>
+                            <input type="number" class="form-input" id="alert-threshold" value="50" min="10" max="500"
+                                required>
+                            <small class="text-muted">전 주기 대비 언급량이 설정한 % 이상 증가하면 알림을 발송합니다.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="alert-email">알림 수신 이메일</label>
+                            <input type="email" class="form-input" id="alert-email" placeholder="example@email.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="alert-webhook">Webhook URL (Slack, Discord 등)</label>
+                            <input type="url" class="form-input" id="alert-webhook"
+                                placeholder="https://hooks.slack.com/services/...">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox" id="alert-enabled" checked>
+                                알림 활성화
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">설정 저장</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-lg">
+                <div class="card-header">
+                    <h3 class="card-title">알림 템플릿 미리보기</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <strong>[트렌드 급증]</strong> 키워드 '<strong>갤럭시</strong>'의 언급량이 전 주기 대비 <strong>75%</strong> 상승했습니다.
+                        (주요 매체: 디시인사이드, 뽐뿌)
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ==================== 계정 관리 ==================== -->
+        <section id="section-accounts" class="tab-content" style="display: none;">
+
+            <!-- 보안 안내 -->
+            <div class="alert alert-warning mb-lg">
+                <strong>🔒 보안 안내</strong><br>
+                입력하신 계정 정보는 암호화되어 저장되며, 데이터 수집 시에만 사용됩니다.<br>
+                가능한 경우 <strong>별도의 수집 전용 계정</strong>을 생성하여 사용하는 것을 권장합니다.
+            </div>
+
+            <!-- 네이버 계정 -->
+            <div class="card mb-lg">
+                <div class="card-header">
+                    <h3 class="card-title">🔵 네이버 계정 (카페 수집용)</h3>
+                </div>
+                <div class="card-body">
+                    <form id="naver-account-form">
+                        <div class="grid grid-2">
+                            <div class="form-group">
+                                <label class="form-label" for="naver-id">네이버 ID</label>
+                                <input type="text" class="form-input" id="naver-id" placeholder="example@naver.com"
+                                    autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="naver-password">비밀번호</label>
+                                <input type="password" class="form-input" id="naver-password" placeholder="••••••••"
+                                    autocomplete="new-password">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox" id="naver-enabled">
+                                네이버 계정 사용 (체크 해제 시 로그인 불필요한 데이터만 수집)
+                            </label>
+                        </div>
+                        <div class="d-flex gap-sm">
+                            <button type="submit" class="btn btn-primary">계정 저장</button>
+                            <button type="button" class="btn btn-outline" onclick="testNaverAccount()">연결 테스트</button>
+                            <button type="button" class="btn btn-danger" onclick="deleteNaverAccount()">계정 삭제</button>
+                        </div>
+                    </form>
+
+                    <!-- 상태 표시 -->
+                    <div id="naver-status" class="mt-md" style="display: none;">
+                        <small class="text-muted">
+                            <span id="naver-status-text"></span>
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 블라인드 계정 -->
+            <div class="card mb-lg">
+                <div class="card-header">
+                    <h3 class="card-title">🟢 블라인드 계정</h3>
+                </div>
+                <div class="card-body">
+                    <form id="blind-account-form">
+                        <div class="grid grid-2">
+                            <div class="form-group">
+                                <label class="form-label" for="blind-email">이메일</label>
+                                <input type="email" class="form-input" id="blind-email"
+                                    placeholder="example@company.com" autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="blind-password">비밀번호</label>
+                                <input type="password" class="form-input" id="blind-password" placeholder="••••••••"
+                                    autocomplete="new-password">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox" id="blind-enabled">
+                                블라인드 계정 사용
+                            </label>
+                        </div>
+                        <div class="d-flex gap-sm">
+                            <button type="submit" class="btn btn-primary">계정 저장</button>
+                            <button type="button" class="btn btn-outline" onclick="testBlindAccount()">연결 테스트</button>
+                            <button type="button" class="btn btn-danger" onclick="deleteBlindAccount()">계정 삭제</button>
+                        </div>
+                    </form>
+
+                    <!-- 상태 표시 -->
+                    <div id="blind-status" class="mt-md" style="display: none;">
+                        <small class="text-muted">
+                            <span id="blind-status-text"></span>
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 수집 가능 매체 안내 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">📋 매체별 계정 요구사항</h3>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>매체</th>
+                                <th>계정 필요 여부</th>
+                                <th>비고</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>📰 구글 뉴스</td>
+                                <td><span class="badge badge-success">불필요</span></td>
+                                <td>RSS 피드 공개</td>
+                            </tr>
+                            <tr>
+                                <td>📰 네이버 뉴스</td>
+                                <td><span class="badge badge-success">불필요</span></td>
+                                <td>검색 결과 공개</td>
+                            </tr>
+                            <tr>
+                                <td>💬 디시인사이드</td>
+                                <td><span class="badge badge-success">불필요</span></td>
+                                <td>통합검색 공개</td>
+                            </tr>
+                            <tr>
+                                <td>💬 뽐뿌</td>
+                                <td><span class="badge badge-success">불필요</span></td>
+                                <td>검색 결과 공개</td>
+                            </tr>
+                            <tr>
+                                <td>💬 루리웹</td>
+                                <td><span class="badge badge-success">불필요</span></td>
+                                <td>게시판 공개</td>
+                            </tr>
+                            <tr>
+                                <td>💬 클리앙</td>
+                                <td><span class="badge badge-success">불필요</span></td>
+                                <td>검색 기능 공개</td>
+                            </tr>
+                            <tr>
+                                <td>💬 블라인드</td>
+                                <td><span class="badge badge-warning">필요</span></td>
+                                <td>로그인 필요 (직장 이메일)</td>
+                            </tr>
+                            <tr>
+                                <td>💬 아사모 (네이버 카페)</td>
+                                <td><span class="badge badge-warning">필요</span></td>
+                                <td>네이버 로그인 + 카페 가입 필요</td>
+                            </tr>
+                            <tr>
+                                <td>📺 유튜브</td>
+                                <td><span class="badge badge-success">불필요</span></td>
+                                <td>API 키만 필요</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Firebase 설정 및 스크립트 -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/admin.js"></script>
+
+    <script>
+        // 탭 전환 함수
+        function switchTab(tab) {
+            // 모든 탭 콘텐츠 숨기기
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+
+            // 모든 탭 버튼 비활성화
+            document.querySelectorAll('[id^="tab-"]').forEach(btn => {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-outline');
+            });
+
+            // 선택된 탭 표시
+            document.getElementById('section-' + tab).style.display = 'block';
+            document.getElementById('tab-' + tab).classList.remove('btn-outline');
+            document.getElementById('tab-' + tab).classList.add('btn-primary');
+        }
+    </script>
+
+</body>
+
+</html>

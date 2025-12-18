@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="키워드 트렌드 모니터링 대시보드 - 뉴스, 커뮤니티, 유튜브의 키워드 트렌드를 실시간으로 확인하세요">
+  <title>키워드 트렌드 모니터링 | 대시보드</title>
+  
+  <!-- 스타일시트 -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+</head>
+<body>
+  
+  <!-- 헤더 -->
+  <header class="header">
+    <div class="container">
+      <div class="header-content">
+        <h1 class="logo">키워드 트렌드 모니터링</h1>
+        <nav class="nav">
+          <a href="index.html" class="nav-link active">대시보드</a>
+          <a href="admin.html" class="nav-link">관리자</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- 메인 콘텐츠 -->
+  <main class="container">
+    
+    <!-- 통계 요약 -->
+    <section class="mb-xl">
+      <h2 class="mb-md">실시간 통계</h2>
+      <div class="grid grid-4">
+        <div class="stat-card">
+          <div class="stat-value" id="total-mentions">0</div>
+          <div class="stat-label">총 언급량</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="active-keywords">0</div>
+          <div class="stat-label">활성 키워드</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="active-sources">0</div>
+          <div class="stat-label">모니터링 매체</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="last-update">-</div>
+          <div class="stat-label">마지막 업데이트</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 키워드 필터 -->
+    <section class="mb-lg">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">필터</h3>
+        </div>
+        <div class="card-body">
+          <div class="grid grid-3">
+            <div class="form-group">
+              <label class="form-label" for="keyword-filter">키워드</label>
+              <select class="form-select" id="keyword-filter">
+                <option value="">전체</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="source-filter">매체</label>
+              <select class="form-select" id="source-filter">
+                <option value="">전체</option>
+                <option value="news">뉴스</option>
+                <option value="community">커뮤니티</option>
+                <option value="youtube">유튜브</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="time-filter">기간</label>
+              <select class="form-select" id="time-filter">
+                <option value="24h">최근 24시간</option>
+                <option value="7d">최근 7일</option>
+                <option value="30d">최근 30일</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 트렌드 그래프 -->
+    <section class="mb-xl">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">키워드 트렌드 추이</h3>
+        </div>
+        <div class="card-body">
+          <div class="chart-container">
+            <canvas id="trend-chart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 급증 알림 -->
+    <section class="mb-xl" id="alerts-section" style="display: none;">
+      <h2 class="mb-md">🔔 트렌드 급증 알림</h2>
+      <div id="alerts-container"></div>
+    </section>
+
+    <!-- 데이터 테이블 -->
+    <section class="mb-xl">
+      <div class="card">
+        <div class="card-header d-flex justify-between align-center">
+          <h3 class="card-title">수집 데이터</h3>
+          <button class="btn btn-outline" id="refresh-btn">
+            <span id="refresh-icon">새로고침</span>
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="table-container">
+            <table class="table" id="data-table">
+              <thead>
+                <tr>
+                  <th>매체</th>
+                  <th>키워드</th>
+                  <th>제목</th>
+                  <th>링크</th>
+                  <th>수집 시간</th>
+                </tr>
+              </thead>
+              <tbody id="data-table-body">
+                <tr>
+                  <td colspan="5" class="text-center text-muted">데이터를 불러오는 중...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- 페이지네이션 -->
+          <div class="d-flex justify-between align-center mt-md">
+            <div class="text-muted" id="pagination-info">0개의 결과</div>
+            <div class="d-flex gap-sm" id="pagination-controls">
+              <button class="btn btn-outline" id="prev-page" disabled>이전</button>
+              <button class="btn btn-outline" id="next-page" disabled>다음</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Firebase 설정 및 스크립트 -->
+  <script src="js/firebase-config.js"></script>
+  <script src="js/dashboard.js"></script>
+  
+</body>
+</html>
